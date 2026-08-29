@@ -1,0 +1,130 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class Solution {
+
+    // Segment Tree supporting Range Max Update (chmax) and Point Query
+    static class SegmentTree {
+        int n;
+        int[] tree;
+
+        public SegmentTree(int n) {
+            this.n = n;
+            tree = new int[4 * n];
+        }
+
+        private void update(int node, int start, int end, int l, int r, int val) {
+            if (l > end || r < start || l > r) return;
+            if (l <= start && end <= r) {
+                tree[node] = Math.max(tree[node], val);
+                return;
+            }
+            int mid = (start + end) / 2;
+            update(2 * node, start, mid, l, r, val);
+            update(2 * node + 1, mid + 1, end, l, r, val);
+        }
+
+        public void update(int l, int r, int val) {
+            update(1, 0, n - 1, l, r, val);
+        }
+
+        private int query(int node, int start, int end, int idx) {
+            if (start == end) {
+                return tree[node];
+            }
+            int mid = (start + end) / 2;
+            int childMax = (idx <= mid) 
+                ? query(2 * node, start, mid, idx) 
+                : query(2 * node + 1, mid + 1, end, idx);
+            return Math.max(tree[node], childMax);
+        }
+
+        public int query(int idx) {
+            return query(1, 0, n - 1, idx);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line1 = br.readLine();
+        if (line1 == null || line1.trim().isEmpty()) return;
+
+        int n = Integer.parseInt(line1.trim());
+        String s = br.readLine().trim();
+
+        // Work with 3 concatenated copies to easily cover all length-N window rotations
+        String s3 = s + s + s;
+        
+        // Transform for Manacher's Algorithm
+        StringBuilder sb = new StringBuilder("#");
+        for (int i = 0; i < s3.length(); i++) {
+            sb.append(s3.charAt(i)).append("#");
+        }
+        String ms = sb.toString();
+        int mLen = ms.length();
+        int[] P = new int[mLen];
+
+        int c = 0, r = 0;
+        for (int i = 0; i < mLen; i++) {
+            int iMirror = 2 * c - i;
+            if (r > i) {
+                P[i] = Math.min(r - i, P[iMirror]);
+            } else {
+                P[i] = 0;
+            }
+            while (i - 1 - P[i] >= 0 && i + 1 + P[i] < mLen 
+                   && ms.charAt(i - 1 - P[i]) == ms.charAt(i + 1 + P[i])) {
+                P[i]++;
+            }
+            if (i + P[i] > r) {
+                c = i;
+                r = i + P[i];
+            }
+        }
+
+        SegmentTree st = new SegmentTree(n);
+
+        // Process all palindrome centers
+        for (int i = 0; i < mLen; i++) {
+            int maxRadius = P[i];
+            if (maxRadius == 0) continue;
+
+            // Map back to 0-indexed positions in s3
+            int origStart = (i - maxRadius) / 2;
+            int origEnd = (i + maxRadius) / 2 - 1;
+
+            // Iterate through valid sub-palindrome lengths
+            for (int rad = maxRadius; rad >= 1; rad -= 2) {
+                int L = (i - rad) / 2;
+                int R = (i + rad) / 2 - 1;
+
+                if (R - L + 1 > n) continue; // Cannot exceed rotation window size N
+
+                // Finding valid starting rotation indices k in [0, N-1]
+                // Palindrome at [L, R] fits in rotation window starting at k iff:
+                // k <= L and k + n - 1 >= R  =>  R - n + 1 <= k <= L
+                int minK = Math.max(0, R - n + 1);
+                int maxK = Math.min(n - 1, L);
+
+                if (minK <= maxK) {
+                    st.update(minK, maxK, rad);
+                }
+
+                // Wrap around check for rotations extending into second/third copy
+                int minK2 = Math.max(0, (R - n) - n + 1);
+                int maxK2 = Math.min(n - 1, L - n);
+                if (minK2 <= maxK2) {
+                    st.update(minK2, maxK2, rad);
+                }
+            }
+        }
+
+        // Output results for rotation offsets 0 to N-1
+        StringBuilder out = new StringBuilder();
+        for (int k = 0; k < n; k++) {
+            out.append(st.query(k)).append("\n");
+        }
+        System.out.print(out);
+    }
+}
