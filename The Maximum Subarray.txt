@@ -1,0 +1,54 @@
+import java.io.*;
+import java.util.*;
+
+class Result {
+
+    public static List<Integer> maxSubarray(List<Integer> arr) {
+        int maxEndingHere = arr.get(0);
+        int maxSoFar = arr.get(0);
+        
+        int maxSingleElement = arr.get(0);
+        int positiveSum = 0;
+        boolean hasPositive = false;
+
+        for (int num : arr) {
+            if (num > 0) {
+                positiveSum += num;
+                hasPositive = true;
+            }
+            maxSingleElement = Math.max(maxSingleElement, num);
+        }
+
+        for (int i = 1; i < arr.size(); i++) {
+            int num = arr.get(i);
+            maxEndingHere = Math.max(num, maxEndingHere + num);
+            maxSoFar = Math.max(maxSoFar, maxEndingHere);
+        }
+
+        int maxSubsequence = hasPositive ? positiveSum : maxSingleElement;
+
+        return Arrays.asList(maxSoFar, maxSubsequence);
+    }
+}
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        if (!scanner.hasNextInt()) return;
+
+        int t = scanner.nextInt();
+
+        for (int tItr = 0; tItr < t; tItr++) {
+            int n = scanner.nextInt();
+            List<Integer> arr = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                arr.add(scanner.nextInt());
+            }
+
+            List<Integer> result = Result.maxSubarray(arr);
+            System.out.println(result.get(0) + " " + result.get(1));
+        }
+
+        scanner.close();
+    }
+}
