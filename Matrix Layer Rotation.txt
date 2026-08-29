@@ -1,0 +1,95 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+
+    public static void matrixRotation(List<List<Integer>> matrix, int r) {
+        int m = matrix.size();
+        int n = matrix.get(0).size();
+        int layers = Math.min(m, n) / 2;
+
+        for (int layer = 0; layer < layers; layer++) {
+            List<Integer> elements = new ArrayList<>();
+
+            // 1. Extract layer elements in anti-clockwise order
+            // Top row
+            for (int j = layer; j < n - layer; j++) {
+                elements.add(matrix.get(layer).get(j));
+            }
+            // Right column
+            for (int i = layer + 1; i < m - layer - 1; i++) {
+                elements.add(matrix.get(i).get(n - 1 - layer));
+            }
+            // Bottom row
+            for (int j = n - 1 - layer; j >= layer; j--) {
+                elements.add(matrix.get(m - 1 - layer).get(j));
+            }
+            // Left column
+            for (int i = m - 2 - layer; i > layer; i--) {
+                elements.add(matrix.get(i).get(layer));
+            }
+
+            // 2. Compute effective rotations
+            int numElements = elements.size();
+            int shift = r % numElements;
+
+            // 3. Write rotated elements back to matrix
+            int idx = shift;
+
+            // Top row
+            for (int j = layer; j < n - layer; j++) {
+                matrix.get(layer).set(j, elements.get(idx));
+                idx = (idx + 1) % numElements;
+            }
+            // Right column
+            for (int i = layer + 1; i < m - layer - 1; i++) {
+                matrix.get(i).set(n - 1 - layer, elements.get(idx));
+                idx = (idx + 1) % numElements;
+            }
+            // Bottom row
+            for (int j = n - 1 - layer; j >= layer; j--) {
+                matrix.get(m - 1 - layer).set(j, elements.get(idx));
+                idx = (idx + 1) % numElements;
+            }
+            // Left column
+            for (int i = m - 2 - layer; i > layer; i--) {
+                matrix.get(i).set(layer, elements.get(idx));
+                idx = (idx + 1) % numElements;
+            }
+        }
+
+        // 4. Print the result
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                sb.append(matrix.get(i).get(j)).append(" ");
+            }
+            sb.append("\n");
+        }
+        System.out.print(sb.toString());
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        String[] firstMultipleInput = bufferedReader.readLine().replaceAll("\\s+$", "").split(" ");
+
+        int m = Integer.parseInt(firstMultipleInput[0]);
+        int n = Integer.parseInt(firstMultipleInput[1]);
+        int r = Integer.parseInt(firstMultipleInput[2]);
+
+        List<List<Integer>> matrix = new ArrayList<>();
+
+        for (int i = 0; i < m; i++) {
+            String[] matrixRowTempItems = bufferedReader.readLine().replaceAll("\\s+$", "").split(" ");
+            List<Integer> matrixRowItems = new ArrayList<>();
+            for (int j = 0; j < n; j++) {
+                int matrixItem = Integer.parseInt(matrixRowTempItems[j]);
+                matrixRowItems.add(matrixItem);
+            }
+            matrix.add(matrixRowItems);
+        }
+
+        matrixRotation(matrix, r);
+        bufferedReader.close();
+    }
+}
