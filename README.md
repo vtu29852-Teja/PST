@@ -19,6 +19,7 @@ A collection of LeetCode questions to ace the coding interview! - Created using 
 |  |
 | ------- |
 | [0867-transpose-matrix](https://github.com/vtu29852-Teja/PST/tree/master/0867-transpose-matrix) |
+| [1603-design-parking-system](https://github.com/vtu29852-Teja/PST/tree/master/1603-design-parking-system) |
 ## Prefix Sum
 |  |
 | ------- |
@@ -95,4 +96,12 @@ A collection of LeetCode questions to ace the coding interview! - Created using 
 |  |
 | ------- |
 | [0005-longest-palindromic-substring](https://github.com/vtu29852-Teja/PST/tree/master/0005-longest-palindromic-substring) |
+## Design
+|  |
+| ------- |
+| [1603-design-parking-system](https://github.com/vtu29852-Teja/PST/tree/master/1603-design-parking-system) |
+## Counting
+|  |
+| ------- |
+| [1603-design-parking-system](https://github.com/vtu29852-Teja/PST/tree/master/1603-design-parking-system) |
 <!---LeetCode Topics End-->
