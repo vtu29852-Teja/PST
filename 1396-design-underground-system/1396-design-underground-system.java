@@ -1,33 +1,16 @@
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 class UndergroundSystem {
 
-    // Helper class to store check-in details
-    private static class CheckInInfo {
-        String stationName;
-        int checkInTime;
-
-        CheckInInfo(String stationName, int checkInTime) {
-            this.stationName = stationName;
-            this.checkInTime = checkInTime;
-        }
-    }
-
-    // Helper class to accumulate trip statistics
-    private static class RouteInfo {
-        double totalTime = 0;
-        int tripCount = 0;
-    }
-
-    // Map: customerId -> CheckInInfo
+    // id -> [stationName, checkInTime]
     private Map<Integer, CheckInInfo> checkIns;
-    // Map: "startStation->endStation" -> RouteInfo
-    private Map<String, RouteInfo> routeStats;
+
+    // "start#end" -> [totalTime, tripCount]
+    private Map<String, TripInfo> trips;
 
     public UndergroundSystem() {
         checkIns = new HashMap<>();
-        routeStats = new HashMap<>();
+        trips = new HashMap<>();
     }
 
     public void checkIn(int id, String stationName, int t) {
@@ -35,18 +18,50 @@ class UndergroundSystem {
     }
 
     public void checkOut(int id, String stationName, int t) {
-        CheckInInfo info = checkIns.remove(id);
-        String routeKey = info.stationName + "->" + stationName;
-        int travelTime = t - info.checkInTime;
+        CheckInInfo info = checkIns.get(id);
 
-        RouteInfo route = routeStats.computeIfAbsent(routeKey, k -> new RouteInfo());
-        route.totalTime += travelTime;
-        route.tripCount += 1;
+        int travelTime = t - info.time;
+
+        String key = info.station + "#" + stationName;
+
+        if (!trips.containsKey(key)) {
+            trips.put(key, new TripInfo(0, 0));
+        }
+
+        TripInfo trip = trips.get(key);
+        trip.totalTime += travelTime;
+        trip.tripCount++;
+
+        checkIns.remove(id);
     }
 
     public double getAverageTime(String startStation, String endStation) {
-        String routeKey = startStation + "->" + endStation;
-        RouteInfo route = routeStats.get(routeKey);
-        return route.totalTime / route.tripCount;
+        String key = startStation + "#" + endStation;
+
+        TripInfo trip = trips.get(key);
+
+        return (double) trip.totalTime / trip.tripCount;
+    }
+
+    // Stores check-in information for a customer
+    private static class CheckInInfo {
+        String station;
+        int time;
+
+        CheckInInfo(String station, int time) {
+            this.station = station;
+            this.time = time;
+        }
+    }
+
+    // Stores statistics for a station pair
+    private static class TripInfo {
+        long totalTime;
+        int tripCount;
+
+        TripInfo(long totalTime, int tripCount) {
+            this.totalTime = totalTime;
+            this.tripCount = tripCount;
+        }
     }
 }
